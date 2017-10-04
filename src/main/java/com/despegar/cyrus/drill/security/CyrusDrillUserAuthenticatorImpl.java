@@ -9,10 +9,10 @@ import org.apache.drill.exec.rpc.user.security.UserAuthenticationException;
 import org.apache.drill.exec.rpc.user.security.UserAuthenticatorTemplate;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.List;
 
 
 @UserAuthenticatorTemplate(type = "cyrusCustomAuthenticatorType")
@@ -30,23 +30,28 @@ public class CyrusDrillUserAuthenticatorImpl implements UserAuthenticator{
 
         String pathName = "/home/despegar/sensitive.conf";
 
-        Optional<String> maybe;
+        String maybe = null;
 
-        try (Stream<String> stream = Files.lines(Paths.get(pathName))) {
+        try {
 
-            maybe = stream
-                    .filter(l -> l.startsWith(USERS_KEY))
-                    .findFirst();
+            List<String> lines = Files.readAllLines(Paths.get(pathName), Charset.defaultCharset());
+
+            for(String line : lines){
+                if(line.startsWith(USERS_KEY)){
+                    maybe = line;
+                    break;
+                }
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
             throw new DrillbitStartupException(e);
         }
 
-        if(!maybe.isPresent())
+        if(maybe == null)
             throw new DrillbitStartupException(String.format("No '%s' property is present.",USERS_KEY));
 
-        String substring = maybe.get().substring(USERS_KEY.length() + 1);
+        String substring = maybe.substring(USERS_KEY.length() + 1);
 
         this.jsonObject = new JsonParser().parse(substring).getAsJsonObject();
     }
