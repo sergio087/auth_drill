@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 
-@UserAuthenticatorTemplate(type = "myCustomAuthenticatorType")
+@UserAuthenticatorTemplate(type = "cyrusCustomAuthenticatorType")
 public class CyrusDrillUserAuthenticatorImpl implements UserAuthenticator{
 
     private JsonObject jsonObject;
@@ -65,6 +65,8 @@ public class CyrusDrillUserAuthenticatorImpl implements UserAuthenticator{
 
         if(!this.jsonObject.get(userName).getAsString().equals(password))
             throw new UserAuthenticationException("User/Password is incorrect.");
+
+
     }
 
     /**
